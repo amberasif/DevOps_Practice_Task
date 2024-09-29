@@ -1,0 +1,50 @@
+name: Deploy Flask API to Server
+
+on:
+  push:
+    branches:
+      - main  # Trigger deployment on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up SSH for server access
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    # Step 3: Connect to the server and deploy
+    - name: Deploy to Server
+      run: |
+        # Login to server via SSH
+        ssh -o StrictHostKeyChecking=no root@89.117.57.199 << 'EOF'
+
+        # Step 4: Navigate to project directory (or clone if necessary)
+        cd amber/project1 || {
+          git clone https://github.com/amberasif/DevOps_Practice_Task.git
+          cd DevOps_Practice_Task        }
+
+        # Step 5: Pull latest changes from the repository
+        git pull origin main
+
+        # Step 6: Install dependencies
+        pip install -r requirements.txt
+
+        # Step 7: Build Docker image
+        docker build -t flask-api .
+
+        # Step 8: Stop and remove the old container (if running)
+        docker stop flask-api || true
+        docker rm flask-api || true
+
+        # Step 9: Run the container
+        docker run -d -p 5000:5000 --name flask-api flask-api
+
+        EOF
