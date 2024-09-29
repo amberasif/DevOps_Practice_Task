@@ -17,7 +17,7 @@ def post_data():
     }), 200
 
 # GET endpoint to return the current time
-@app.route('/api/time', methods=['GET'])
+@app.route('/api/current_time', methods=['GET'])
 def get_time():
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
